@@ -1,0 +1,37 @@
+#include <msp430.h>
+
+#define SW  BIT3                    // Switch -> P1.3 (On-board Switch, Pull-Up configuration)
+#define LED BIT7                    // Red LED -> P1.7 (On-Board LED, Active High Configuration)
+#define LED1 BIT2                   // Red LED1 -> P1.2
+
+void main(void) {
+    WDTCTL = WDTPW | WDTHOLD;       //! Stop Watchdog (Not recommended for code in production and devices working in field)
+
+    //volatile unsigned long i;
+
+    P1DIR |= LED+LED1;                   // Set LED pin -> Output
+   // P1DIR |= LED1;                  // Set LED1 pin -> Output
+
+    P1DIR &= ~SW;                   // Set SW pin -> Input
+
+    P1OUT &= ~(LED+LED1);
+
+    while(1)
+    {
+        if(!(P1IN & SW))            // If SW is Pressed
+        {
+            __delay_cycles(20000); //wait 20ms to debounce
+            while(!(P1IN & SW));    // Wait till SW Released
+            //__delay_cycles(20000); //wait 20ms to debounce
+            P1OUT ^= LED;           // Toggle LED
+            P1OUT ^= LED1;          //Toggle LED1
+            __delay_cycles(200000); // wait 20ms to debounce
+            __delay_cycles(200000); // wait 20ms to debounce
+            __delay_cycles(200000); // wait 20ms to debounce
+            __delay_cycles(200000); // wait 20ms to debounce
+            P1OUT ^= LED;
+            P1OUT ^= LED1;
+
+        }
+    }
+}
